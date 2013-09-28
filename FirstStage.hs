@@ -20,9 +20,9 @@ where
 	withinRange x y = x - range < y && x + range > y  
 
 	isMated :: Patch -> Patch -> Bool
-	isMated (Patch x _) (Patch y _) = 2 <= length (filter (== True) ranged)
+	isMated (Patch x _) (Patch y _) = 2 <= length ranged
 		where
-			ranged = [withinRange (c x) (c y) | c <- [red, green, blue]]
+			ranged = [1 | c <- [red, green, blue], withinRange (c x) (c y)]
 
 	isVisible :: Patch -> Patch -> Double -> Bool
 	isVisible spotter@(Patch x y) spottee@(Patch i j) distance = finalDistance >= distance
