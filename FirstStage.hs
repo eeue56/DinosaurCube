@@ -28,7 +28,7 @@ where
 	isVisible spotter@(Patch x y) spottee@(Patch i j) distance = finalDistance >= distance
 		where
 			spotterViewDistance = viewingDistance * y
-			spotteeShowingChance = ((alpha i) * viewingDistance) / j 
+			spotteeShowingChance = j * (alpha i)
 			finalDistance = if isMated spotter spottee then
 					spotterViewDistance + spotteeShowingChance
 				else
@@ -38,6 +38,6 @@ where
 
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 3), 
-			(Patch (Colour 120 38 160 0.4) 2)) 
-		putStrLn $ show $ [(x, isVisible (fst testCouple) (snd testCouple) x) | x <- [1,13]]
+			(Patch (Colour 120 38 160 0.2) 2)) 
+		putStrLn $ show $ [(x, isVisible (fst testCouple) (snd testCouple) x) | x <- [1..13]]
 		putStrLn $ show $ isMated (fst testCouple) (snd testCouple) 
