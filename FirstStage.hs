@@ -39,7 +39,7 @@ where
 	isMated (Patch x _ _) (Patch y _ _) = 2 <= matesRates x y
 
 	isThreat :: Patch -> Patch -> Bool
-	isThreat hunter@(Patch x y _) hunted@(Patch i j _) = y >= (j + simRate) 
+	isThreat hunted@(Patch x y _) hunter@(Patch i j _) = j >= (y + simRate) 
 		where 
 			simRate = fromIntegral $ matesRates x i
 
@@ -69,16 +69,21 @@ where
 			sorter = sortPatchesByDistance p
 
 	visiblePatches :: Patch -> [Patch] -> [Patch]
-	visiblePatches p xs = filter (isVisible p) (byDistance p xs)
+	visiblePatches p xs = filter (isVisible p) $ byDistance p xs
+
+	threateningPatches :: Patch -> [Patch] -> [Patch]
+	threateningPatches p xs = filter (isThreat p) $ visiblePatches p xs
 
 	main = do
-		let testCouple = ((Patch (Colour 125 34 78 0.5) 3 (Coord 3 2)), 
+		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
 			(Patch (Colour 120 38 160 0.2) 2 (Coord 2 3) )) 
 
-		let patches = [Patch (Colour 125 125 125 0.5) 4 (Coord x y) | x <- [1, 3..25], y <- [2, 4..26]]
+		let patches = [Patch (Colour 120 30 2 0.3) 3 (Coord x y) | x <- [1, 3..25], y <- [2, 4..26]]
+		
 		putStrLn $ show $ isVisible (fst testCouple) (snd testCouple)
 		putStrLn $ show $ isMated (fst testCouple) (snd testCouple) 
 		putStrLn $ show $ isThreat (fst testCouple) (snd testCouple) 
 		putStrLn $ show $ distanceBetween (coord $ fst testCouple) (coord $ snd testCouple)
 		putStrLn $ show $ [coord x | x <- take 4 (byDistance (fst testCouple) patches)]
 		putStrLn $ show $ length $ visiblePatches (fst testCouple) patches
+		putStrLn $ show $ length $ threateningPatches (fst testCouple) patches
