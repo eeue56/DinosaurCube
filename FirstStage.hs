@@ -76,6 +76,8 @@ where
 	isNextTo :: Patch -> Patch -> Bool
 	isNextTo (Patch _ _ c1) (Patch _ _ c2) = distanceBetween c1 c2 <= 2.0
 
+	neighbours :: Patch -> [Patch] -> [Patch]
+	neighbours p xs = filter (isNextTo p) xs
 
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
@@ -99,3 +101,4 @@ where
 		putStrLn $ show $ matePatches (fst testCouple) (snd testCouple)
 
 		putStrLn $ show $ isNextTo (fst testCouple) (snd testCouple)
+		putStrLn $ show $ length $ neighbours (fst testCouple) patches
