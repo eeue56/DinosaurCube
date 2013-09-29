@@ -74,6 +74,9 @@ where
 	threateningPatches :: Patch -> [Patch] -> [Patch]
 	threateningPatches p xs = filter (isThreat p) $ visiblePatches p xs
 
+	matingPatches :: Patch -> [Patch] -> [Patch]
+	matingPatches p xs = filter (isMated p) $ visiblePatches p xs
+
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
 			(Patch (Colour 120 38 160 0.2) 2 (Coord 2 3) )) 
@@ -87,3 +90,6 @@ where
 		putStrLn $ show $ [coord x | x <- take 4 (byDistance (fst testCouple) patches)]
 		putStrLn $ show $ length $ visiblePatches (fst testCouple) patches
 		putStrLn $ show $ length $ threateningPatches (fst testCouple) patches
+		putStrLn $ show $ length $ threateningPatches (snd testCouple) patches
+		putStrLn $ show $ length $ matingPatches (fst testCouple) patches
+		putStrLn $ show $ length $ matingPatches (snd testCouple) patches
