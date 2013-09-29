@@ -1,6 +1,8 @@
 module FirstStage
 where
 
+	import Data.List
+
 	data Colour = Colour {
 		red :: Int,
 		green :: Int,
@@ -25,8 +27,8 @@ where
 	distanceBetween :: Coordinate -> Coordinate -> Double
 	distanceBetween (Coord x y) (Coord i j) = xs + ys
 		where 
-			xs = sqrt $ fromIntegral $ (x^2) + (i^2)
-			ys = sqrt $ fromIntegral $ (y^2) + (j^2)  
+			xs = sqrt $ fromIntegral $ (x - i)^2
+			ys = sqrt $ fromIntegral $ (y - j)^2  
 
 	matesRates :: Colour -> Colour -> Int
 	matesRates x y = length ranged
@@ -52,18 +54,29 @@ where
 				else
 					spotterViewDistance
 
-	nearestFour :: Coordinate -> [[Patch]] -> [(Patch, Coordinate)]
-	nearestFour (Coord i j) xs =[]
+	sortPatchesByDistance :: Patch -> Patch -> Patch -> Ordering
+	sortPatchesByDistance (Patch _ _ c) y z
+		| cToY > cToZ = GT
+		| cToY < cToZ = LT 
+		| otherwise = EQ
+		where 
+			cToY = distanceBetween c (coord y)
+			cToZ = distanceBetween c (coord z)
+
+	byDistance :: Patch -> [Patch] -> [Patch]
+	byDistance p@(Patch _ _ c) xs = sortBy sorter xs
 		where
-			me = xs !! i !! j
-
-
-
+			sorter = sortPatchesByDistance p
 
 	main = do
-		let testCouple = ((Patch (Colour 125 34 78 0.5) 3 (Coord 3 5)), 
+		let testCouple = ((Patch (Colour 125 34 78 0.5) 3 (Coord 3 2)), 
 			(Patch (Colour 120 38 160 0.2) 2 (Coord 2 3) )) 
+
+		let patches = [Patch (Colour 125 125 125 0.5) 4 (Coord x y) | x <- [1..5], y <- [1..5]]
 		putStrLn $ show $ isVisible (fst testCouple) (snd testCouple)
 		putStrLn $ show $ isMated (fst testCouple) (snd testCouple) 
 		putStrLn $ show $ isThreat (fst testCouple) (snd testCouple) 
 		putStrLn $ show $ distanceBetween (coord $ fst testCouple) (coord $ snd testCouple)
+
+		putStrLn $ show $ [coord x | x <- patches]
+		putStrLn $ show $ [coord x | x <- take 4 (byDistance (fst testCouple) patches)]
