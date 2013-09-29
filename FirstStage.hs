@@ -56,10 +56,19 @@ where
 	matingPatches p xs = filter (isMated p) $ visiblePatches p xs
 
 	matePatches :: Patch -> Patch -> Patch
-	matePatches p1@(Patch c1 s1) p2@(Patch c2 s2) =
-
+	matePatches p1@(Patch c1 s1 l1) p2@(Patch c2 s2 l2) = Patch (Colour r g b a) s l1 
 		where
+			s = newSize s1 s2
+			r = newRed c1 c2
+			g = newGreen c1 c2
+			b = newBlue c1 c2
+			a = newAlpha c1 c2
 
+	newSize :: Double -> Double -> Double 
+	newSize s1 s2 
+		| s1 < s2 = s1 + (s2 / 5)
+		| s1 > s2 = s2 - (s1 / 5)
+		| otherwise = s1
 
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
@@ -77,3 +86,5 @@ where
 		putStrLn $ show $ length $ threateningPatches (snd testCouple) patches
 		putStrLn $ show $ length $ matingPatches (fst testCouple) patches
 		putStrLn $ show $ length $ matingPatches (snd testCouple) patches
+
+		putStrLn $ show $ matePatches (fst testCouple) (snd testCouple)
