@@ -1,14 +1,8 @@
 module FirstStage
 where
-
+	import Colours
 	import Data.List
 
-	data Colour = Colour {
-		red :: Int,
-		green :: Int,
-		blue :: Int,
-		alpha :: Double
-		} deriving (Show, Eq)
 
 	data Patch = Patch {
 		colour :: Colour,
@@ -21,8 +15,7 @@ where
 	range = 25
 	viewingDistance = 4
 
-	withinRange :: Int -> Int -> Bool
-	withinRange x y = x - range < y && x + range > y 
+	
 
 	distanceBetween :: Coordinate -> Coordinate -> Double
 	distanceBetween (Coord x y) (Coord i j) = xs + ys
@@ -36,12 +29,8 @@ where
 			x = sum [xcor | (Coord xcor _) <- xs]
 			y = sum [ycor | (Coord _ ycor) <- xs]
 			size = length xs
-			
-	matesRates :: Colour -> Colour -> Int
-	matesRates x y = length ranged
-		where
-			ranged = [1 | c <- [red, green, blue], withinRange (c x) (c y)]
 
+	
 	isMated :: Patch -> Patch -> Bool
 	isMated (Patch x _ _) (Patch y _ _) = 2 <= matesRates x y
 
@@ -84,6 +73,7 @@ where
 	matingPatches :: Patch -> [Patch] -> [Patch]
 	matingPatches p xs = filter (isMated p) $ visiblePatches p xs
 
+	
 
 
 	main = do
