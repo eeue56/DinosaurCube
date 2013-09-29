@@ -15,3 +15,5 @@ where
 			x = sum [xcor | (Coord xcor _) <- xs]
 			y = sum [ycor | (Coord _ ycor) <- xs]
 			size = length xs
+
+	

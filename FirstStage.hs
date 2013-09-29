@@ -12,6 +12,12 @@ where
 
 	range = 25
 	viewingDistance = 4
+	
+	newSize :: Double -> Double -> Double 
+	newSize s1 s2 
+		| s1 < s2 = s1 + (s2 / 5)
+		| s1 > s2 = s2 - (s1 / 5)
+		| otherwise = s1
 
 	isMated :: Patch -> Patch -> Bool
 	isMated (Patch x _ _) (Patch y _ _) = 2 <= matesRates x y
@@ -67,11 +73,9 @@ where
 			b = newBlue c1 c2
 			a = newAlpha c1 c2
 
-	newSize :: Double -> Double -> Double 
-	newSize s1 s2 
-		| s1 < s2 = s1 + (s2 / 5)
-		| s1 > s2 = s2 - (s1 / 5)
-		| otherwise = s1
+	isNextTo :: Patch -> Patch -> Bool
+	isNextTo (Patch _ _ c1) (Patch _ _ c2) = distanceBetween c1 c2 <= 2.0
+
 
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
@@ -93,3 +97,5 @@ where
 		putStrLn $ show $ threatRate (fst testCouple) (snd testCouple)
 
 		putStrLn $ show $ matePatches (fst testCouple) (snd testCouple)
+
+		putStrLn $ show $ isNextTo (fst testCouple) (snd testCouple)
