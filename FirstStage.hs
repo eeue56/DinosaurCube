@@ -1,8 +1,8 @@
 module FirstStage
 where
 	import Colours
+	import Coordinates
 	import Data.List
-
 
 	data Patch = Patch {
 		colour :: Colour,
@@ -10,27 +10,9 @@ where
 		coord :: Coordinate
 	} deriving (Show, Eq)
 
-	data Coordinate = Coord Int Int deriving (Show, Eq, Ord)
-
 	range = 25
 	viewingDistance = 4
 
-	
-
-	distanceBetween :: Coordinate -> Coordinate -> Double
-	distanceBetween (Coord x y) (Coord i j) = xs + ys
-		where 
-			xs = sqrt $ fromIntegral $ (x - i)^2
-			ys = sqrt $ fromIntegral $ (y - j)^2  
-
-	averageCoord :: [Coordinate] -> Coordinate
-	averageCoord xs = Coord (div x size) (div y size)
-		where
-			x = sum [xcor | (Coord xcor _) <- xs]
-			y = sum [ycor | (Coord _ ycor) <- xs]
-			size = length xs
-
-	
 	isMated :: Patch -> Patch -> Bool
 	isMated (Patch x _ _) (Patch y _ _) = 2 <= matesRates x y
 
@@ -72,9 +54,6 @@ where
 
 	matingPatches :: Patch -> [Patch] -> [Patch]
 	matingPatches p xs = filter (isMated p) $ visiblePatches p xs
-
-	
-
 
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
