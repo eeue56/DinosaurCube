@@ -3,6 +3,7 @@ where
 	import Colours
 	import Coordinates
 	import Data.List
+	import Control.Monad
 
 	data Patch = Patch {
 		colour :: Colour,
@@ -79,6 +80,13 @@ where
 	neighbours :: Patch -> [Patch] -> [Patch]
 	neighbours p xs = filter (isNextTo p) xs
 
+	dealDamage :: Patch -> Patch -> Patch
+	dealDamage p1 p2 = p2 {size = s2 - (s1 * a1)}
+		where
+			s2 = size p2
+			s1 = size p1
+			a1 = alpha $ colour p1
+
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
 			(Patch (Colour 120 38 160 0.2) 2 (Coord 2 3) )) 
@@ -102,3 +110,6 @@ where
 
 		putStrLn $ show $ isNextTo (fst testCouple) (snd testCouple)
 		putStrLn $ show $ length $ neighbours (fst testCouple) patches
+
+		putStrLn $ show $ dealDamage (fst testCouple) (snd testCouple)
+		putStrLn $ show $ fst testCouple
