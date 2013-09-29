@@ -55,6 +55,12 @@ where
 	matingPatches :: Patch -> [Patch] -> [Patch]
 	matingPatches p xs = filter (isMated p) $ visiblePatches p xs
 
+	matePatches :: Patch -> Patch -> Patch
+	matePatches p1@(Patch c1 s1) p2@(Patch c2 s2) =
+
+		where
+
+
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
 			(Patch (Colour 120 38 160 0.2) 2 (Coord 2 3) )) 

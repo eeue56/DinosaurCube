@@ -23,3 +23,21 @@ where
 		| a1 > a2 = (a1 + a2) / 2
 		| a1 < a2 = (a1 + (a2 / 2)) / 2
 		| otherwise = a1
+
+	newRed :: Colour -> Colour -> Int
+	newRed (Colour r1 _ _ _) (Colour r2 _ _ _)
+		| r1 > r2 = div (r1 + r2) 2
+		| r1 < r2 = div (r1 + (div r2 2)) 2
+		| otherwise = r1
+
+	newGreen :: Colour -> Colour -> Int
+	newGreen (Colour _ g1 _ _) (Colour _ g2 _ _)
+		| g1 > g2 = div (g1 + g2) 2
+		| g1 < g2 = div (g1 + (div g2 2)) 2
+		| otherwise = g1
+
+	newBlue :: Colour -> Colour -> Int
+	newBlue (Colour _ _ b1 _) (Colour _ _ b2 _)
+		| b1 > b2 = div (b1 + b2) 2
+		| b1 < b2 = div (b1 + (div b2 2)) 2
+		| otherwise = b1
