@@ -10,15 +10,23 @@ where
 
 	data Patch = Patch {
 		colour :: Colour,
-		size :: Double
+		size :: Double, 
+		coord :: Coordinate
 	} deriving (Show, Eq)
+
+	data Coordinate = Coord Int Int deriving (Show, Eq, Ord)
 
 	range = 25
 	viewingDistance = 4
 
 	withinRange :: Int -> Int -> Bool
-	withinRange x y = x - range < y && x + range > y  
+	withinRange x y = x - range < y && x + range > y 
 
+	distanceBetween :: Coordinate -> Coordinate -> Double
+	distanceBetween (Coord x y) (Coord i j) = xs + ys
+		where 
+			xs = sqrt $ fromIntegral $ (x^2) + (i^2)
+			ys = sqrt $ fromIntegral $ (y^2) + (j^2)  
 
 	matesRates :: Colour -> Colour -> Int
 	matesRates x y = length ranged
@@ -26,16 +34,17 @@ where
 			ranged = [1 | c <- [red, green, blue], withinRange (c x) (c y)]
 
 	isMated :: Patch -> Patch -> Bool
-	isMated (Patch x _) (Patch y _) = 2 <= matesRates x y
+	isMated (Patch x _ _) (Patch y _ _) = 2 <= matesRates x y
 
 	isThreat :: Patch -> Patch -> Bool
-	isThreat hunter@(Patch x y) hunted@(Patch i j) = y >= (j + simRate) 
+	isThreat hunter@(Patch x y _) hunted@(Patch i j _) = y >= (j + simRate) 
 		where 
 			simRate = fromIntegral $ matesRates x i
 
-	isVisible :: Patch -> Patch -> Double -> Bool
-	isVisible spotter@(Patch x y) spottee@(Patch i j) distance = finalDistance >= distance
+	isVisible :: Patch -> Patch -> Bool
+	isVisible spotter@(Patch x y z) spottee@(Patch i j k) = finalDistance >= distance
 		where
+			distance = distanceBetween z k
 			spotterViewDistance = viewingDistance * y
 			spotteeShowingChance = j * (alpha i)
 			finalDistance = if isMated spotter spottee then
@@ -43,11 +52,18 @@ where
 				else
 					spotterViewDistance
 
+	nearestFour :: Coordinate -> [[Patch]] -> [(Patch, Coordinate)]
+	nearestFour (Coord i j) xs =[]
+		where
+			me = xs !! i !! j
+
+
 
 
 	main = do
-		let testCouple = ((Patch (Colour 125 34 78 0.5) 3), 
-			(Patch (Colour 120 38 160 0.2) 2)) 
-		putStrLn $ show $ [(x, isVisible (fst testCouple) (snd testCouple) x) | x <- [1..13]]
+		let testCouple = ((Patch (Colour 125 34 78 0.5) 3 (Coord 3 5)), 
+			(Patch (Colour 120 38 160 0.2) 2 (Coord 2 3) )) 
+		putStrLn $ show $ isVisible (fst testCouple) (snd testCouple)
 		putStrLn $ show $ isMated (fst testCouple) (snd testCouple) 
 		putStrLn $ show $ isThreat (fst testCouple) (snd testCouple) 
+		putStrLn $ show $ distanceBetween (coord $ fst testCouple) (coord $ snd testCouple)
