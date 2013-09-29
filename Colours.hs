@@ -6,7 +6,7 @@ where
 		green :: Int,
 		blue :: Int,
 		alpha :: Double
-		} deriving (Show, Eq)
+		} deriving (Show, Eq, Ord)
 
 	range = 25
 

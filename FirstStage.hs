@@ -8,7 +8,7 @@ where
 		colour :: Colour,
 		size :: Double, 
 		coord :: Coordinate
-	} deriving (Show, Eq)
+	} deriving (Show, Eq, Ord)
 
 	range = 25
 	viewingDistance = 4
@@ -16,10 +16,13 @@ where
 	isMated :: Patch -> Patch -> Bool
 	isMated (Patch x _ _) (Patch y _ _) = 2 <= matesRates x y
 
-	isThreat :: Patch -> Patch -> Bool
-	isThreat hunted@(Patch x y _) hunter@(Patch i j _) = j >= (y + simRate) 
+	threatRate :: Patch -> Patch -> Double
+	threatRate hunted@(Patch x y _) hunter@(Patch i j _) = j - (y + simRate) 
 		where 
 			simRate = fromIntegral $ matesRates x i
+
+	isThreat :: Patch -> Patch -> Bool
+	isThreat h1 h2 = threatRate h1 h2 > 0.0
 
 	isVisible :: Patch -> Patch -> Bool
 	isVisible spotter@(Patch x y z) spottee@(Patch i j k) = finalDistance >= distance
@@ -86,5 +89,7 @@ where
 		putStrLn $ show $ length $ threateningPatches (snd testCouple) patches
 		putStrLn $ show $ length $ matingPatches (fst testCouple) patches
 		putStrLn $ show $ length $ matingPatches (snd testCouple) patches
+
+		putStrLn $ show $ threatRate (fst testCouple) (snd testCouple)
 
 		putStrLn $ show $ matePatches (fst testCouple) (snd testCouple)
