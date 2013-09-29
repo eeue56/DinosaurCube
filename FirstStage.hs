@@ -1,3 +1,5 @@
+{-# LANGUAGE ParallelListComp #-}
+
 module FirstStage
 where
 	import Colours
@@ -87,20 +89,46 @@ where
 			s1 = size p1
 			a1 = alpha $ colour p1
 
+	possibleMoves :: Patch -> [Patch] -> [Coordinate]
+	possibleMoves p@(Patch _ _ (Coord i j)) xs = 
+		[Coord x y | 
+			x <- [i - 1..i + 1], 
+			y <- [j - 1..j + 1], 
+			not $ any (isIn x y) n
+		]
+		where
+			isIn i j (Patch _ _ (Coord x y)) = x == i && y == j
+			n = neighbours p xs
+
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
 			(Patch (Colour 120 38 160 0.2) 2 (Coord 2 3) )) 
 
-		let patches = [Patch (Colour 120 30 2 0.3) 3 (Coord x y) | x <- [1, 3..25], y <- [2, 4..26]]
+		let patches = [Patch (Colour 120 30 2 0.3) 3 (Coord x y) | x <- [1,3..5], y <- [1..5]]
 		
+		putStrLn $ "Is second of test couple visibile to first?"
 		putStrLn $ show $ isVisible (fst testCouple) (snd testCouple)
+
+		putStrLn $ "Are the test couple a breedable pair?"
 		putStrLn $ show $ isMated (fst testCouple) (snd testCouple) 
+
+		putStrLn $ "Is the second a threat to the first?"
 		putStrLn $ show $ isThreat (fst testCouple) (snd testCouple) 
+
+		putStrLn $ "What's the distance between them?"
 		putStrLn $ show $ distanceBetween (coord $ fst testCouple) (coord $ snd testCouple)
+		
+		putStrLn $ "What's the coordinates of the closest patches to the first?"
 		putStrLn $ show $ [coord x | x <- take 4 (byDistance (fst testCouple) patches)]
+		
+		putStrLn $ "How many patches are visible to first?"
 		putStrLn $ show $ length $ visiblePatches (fst testCouple) patches
+		
+		putStrLn $ "How many threating patches are there to each couple member?"
 		putStrLn $ show $ length $ threateningPatches (fst testCouple) patches
 		putStrLn $ show $ length $ threateningPatches (snd testCouple) patches
+
+		putStrLn $ "How many patches are mateable?"
 		putStrLn $ show $ length $ matingPatches (fst testCouple) patches
 		putStrLn $ show $ length $ matingPatches (snd testCouple) patches
 
@@ -112,4 +140,9 @@ where
 		putStrLn $ show $ length $ neighbours (fst testCouple) patches
 
 		putStrLn $ show $ dealDamage (fst testCouple) (snd testCouple)
-		putStrLn $ show $ fst testCouple
+		putStrLn $ show $ snd testCouple
+
+
+		putStrLn $ show $ [(x, y) | x <- [1..3] , y <- [2..4] ]
+		putStrLn $ show $ [(x, y) | (Patch _ _ (Coord x y)) <- patches] 
+		putStrLn $ show $ [(x, y) | (Coord x y) <- possibleMoves (snd testCouple) patches]
