@@ -30,6 +30,13 @@ where
 			xs = sqrt $ fromIntegral $ (x - i)^2
 			ys = sqrt $ fromIntegral $ (y - j)^2  
 
+	averageCoord :: [Coordinate] -> Coordinate
+	averageCoord xs = Coord (div x size) (div y size)
+		where
+			x = sum [xcor | (Coord xcor _) <- xs]
+			y = sum [ycor | (Coord _ ycor) <- xs]
+			size = length xs
+			
 	matesRates :: Colour -> Colour -> Int
 	matesRates x y = length ranged
 		where
@@ -76,6 +83,8 @@ where
 
 	matingPatches :: Patch -> [Patch] -> [Patch]
 	matingPatches p xs = filter (isMated p) $ visiblePatches p xs
+
+
 
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
