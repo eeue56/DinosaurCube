@@ -19,10 +19,19 @@ where
 	withinRange :: Int -> Int -> Bool
 	withinRange x y = x - range < y && x + range > y  
 
-	isMated :: Patch -> Patch -> Bool
-	isMated (Patch x _) (Patch y _) = 2 <= length ranged
+
+	matesRates :: Colour -> Colour -> Int
+	matesRates x y = length ranged
 		where
 			ranged = [1 | c <- [red, green, blue], withinRange (c x) (c y)]
+
+	isMated :: Patch -> Patch -> Bool
+	isMated (Patch x _) (Patch y _) = 2 <= matesRates x y
+
+	isThreat :: Patch -> Patch -> Bool
+	isThreat hunter@(Patch x y) hunted@(Patch i j) = y >= (j + simRate) 
+		where 
+			simRate = fromIntegral $ matesRates x i
 
 	isVisible :: Patch -> Patch -> Double -> Bool
 	isVisible spotter@(Patch x y) spottee@(Patch i j) distance = finalDistance >= distance
@@ -41,3 +50,4 @@ where
 			(Patch (Colour 120 38 160 0.2) 2)) 
 		putStrLn $ show $ [(x, isVisible (fst testCouple) (snd testCouple) x) | x <- [1..13]]
 		putStrLn $ show $ isMated (fst testCouple) (snd testCouple) 
+		putStrLn $ show $ isThreat (fst testCouple) (snd testCouple) 
