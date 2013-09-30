@@ -1,4 +1,4 @@
-{-# LANGUAGE ParallelListComp #-}
+{-# LANGUAGE ParallelListComp, TemplateHaskell, TypeOperators #-}
 
 module FirstStage
 where
@@ -6,13 +6,17 @@ where
 	import Coordinates
 	import Data.List
 	import Control.Monad
+	import Control.Category
+	import Data.Label
+	import Prelude hiding ((.), id)
 
 	data Patch = Patch {
-		colour :: Colour,
-		size :: Double, 
-		coord :: Coordinate
+		_colour :: Colour,
+		_size :: Double, 
+		_coord :: Coordinate
 	} deriving (Show, Eq, Ord)
 
+	mkLabels[''Patch]
 	range = 25
 	viewingDistance = 4
 	
@@ -50,11 +54,11 @@ where
 		| cToY < cToZ = LT 
 		| otherwise = EQ
 		where 
-			cToY = distanceBetween c (coord y)
-			cToZ = distanceBetween c (coord z)
+			cToY = distanceBetween c (get coord y)
+			cToZ = distanceBetween c (get coord z)
 
 	byDistance :: Patch -> [Patch] -> [Patch]
-	byDistance p@(Patch _ _ c) xs = sortBy sorter xs
+	byDistance p xs = sortBy sorter xs
 		where
 			sorter = sortPatchesByDistance p
 
@@ -68,7 +72,7 @@ where
 	matingPatches p xs = filter (isMated p) $ visiblePatches p xs
 
 	matePatches :: Patch -> Patch -> Patch
-	matePatches p1@(Patch c1 s1 l1) p2@(Patch c2 s2 l2) = Patch (Colour r g b a) s l1 
+	matePatches (Patch c1 s1 l1) (Patch c2 s2 l2) = Patch (Colour r g b a) s l1 
 		where
 			s = newSize s1 s2
 			r = newRed c1 c2
@@ -83,18 +87,19 @@ where
 	neighbours p xs = filter (isNextTo p) xs
 
 	dealDamage :: Patch -> Patch -> Patch
-	dealDamage p1 p2 = p2 {size = s2 - (s1 * a1)}
+	dealDamage p1 p2 = set size (s2 - (s1 * a1)) p1
 		where
-			s2 = size p2
-			s1 = size p1
-			a1 = alpha $ colour p1
+			s2 = get size p2
+			s1 = get size p1
+			a1 = alpha $ get colour p1
 
 	possibleMoves :: Patch -> [Patch] -> [Coordinate]
 	possibleMoves p@(Patch _ _ (Coord i j)) xs = 
 		[Coord x y | 
 			x <- [i - 1..i + 1], 
 			y <- [j - 1..j + 1], 
-			not $ any (isIn x y) n
+			not $ any (isIn x y) n,
+			x /= i || y /= j
 		]
 		where
 			isIn i j (Patch _ _ (Coord x y)) = x == i && y == j
@@ -116,10 +121,10 @@ where
 		putStrLn $ show $ isThreat (fst testCouple) (snd testCouple) 
 
 		putStrLn $ "What's the distance between them?"
-		putStrLn $ show $ distanceBetween (coord $ fst testCouple) (coord $ snd testCouple)
+		putStrLn $ show $ distanceBetween (get coord $ fst testCouple) (get coord $ snd testCouple)
 		
 		putStrLn $ "What's the coordinates of the closest patches to the first?"
-		putStrLn $ show $ [coord x | x <- take 4 (byDistance (fst testCouple) patches)]
+		putStrLn $ show $ [get coord x | x <- take 4 (byDistance (fst testCouple) patches)]
 		
 		putStrLn $ "How many patches are visible to first?"
 		putStrLn $ show $ length $ visiblePatches (fst testCouple) patches
