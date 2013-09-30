@@ -42,7 +42,7 @@ where
 		where
 			distance = distanceBetween z k
 			spotterViewDistance = viewingDistance * y
-			spotteeShowingChance = j * (alpha i)
+			spotteeShowingChance = j * (get alpha i)
 			finalDistance = if isMated spotter spottee then
 					spotterViewDistance + spotteeShowingChance
 				else
@@ -91,7 +91,7 @@ where
 		where
 			s2 = get size p2
 			s1 = get size p1
-			a1 = alpha $ get colour p1
+			a1 = get alpha $ get colour p1
 
 	possibleMoves :: Patch -> [Patch] -> [Coordinate]
 	possibleMoves p@(Patch _ _ (Coord i j)) xs = 
@@ -145,8 +145,10 @@ where
 		putStrLn $ show $ length $ neighbours (fst testCouple) patches
 
 		putStrLn $ show $ dealDamage (fst testCouple) (snd testCouple)
-		putStrLn $ show $ snd testCouple
+	
 
+		
+		putStrLn $ show $ patches !! 2
 
 		putStrLn $ show $ [(x, y) | x <- [1..3] , y <- [2..4] ]
 		putStrLn $ show $ [(x, y) | (Patch _ _ (Coord x y)) <- patches] 

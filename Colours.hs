@@ -1,12 +1,20 @@
+{-# LANGUAGE ParallelListComp, TemplateHaskell, TypeOperators #-}
+
 module Colours
 where
+	import Control.Monad
+	import Control.Category
+	import Data.Label
+	import Prelude hiding ((.), id)
 
 	data Colour = Colour {
-		red :: Int,
-		green :: Int,
-		blue :: Int,
-		alpha :: Double
+		_red :: Int,
+		_green :: Int,
+		_blue :: Int,
+		_alpha :: Double
 		} deriving (Show, Eq, Ord)
+
+	mkLabels[''Colour]
 
 	range = 25
 
@@ -16,7 +24,7 @@ where
 	matesRates :: Colour -> Colour -> Int
 	matesRates x y = length ranged
 		where
-			ranged = [1 | c <- [red, green, blue], withinRange (c x) (c y)]
+			ranged = [1 | c <- [red, green, blue], withinRange (get c x) (get c y)]
 
 	newAlpha :: Colour -> Colour -> Double
 	newAlpha (Colour _ _ _ a1) (Colour _ _ _ a2)
