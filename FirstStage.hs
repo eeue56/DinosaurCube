@@ -105,11 +105,24 @@ where
 			isIn i j (Patch _ _ (Coord x y)) = x == i && y == j
 			n = neighbours p xs
 
+	nearestFreeCoord :: Patch -> [Patch] -> Coordinate
+	nearestFreeCoord p xs = 
+		if moves /= [] then
+			head moves
+		else
+			head $ head [x | x <- myMoves , x /= []]
+		where 
+			moves = possibleMoves p xs
+			myNeighbours = neighbours p xs
+			myMoves = head [ys | x <- neighbours p xs, let ys = [possibleMoves i xs | i <- neighbours x xs], ys /= []]
+
+
+
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
 			(Patch (Colour 120 38 160 0.2) 2 (Coord 2 3) )) 
 
-		let patches = [Patch (Colour 120 30 2 0.3) 3 (Coord x y) | x <- [1,3..5], y <- [1..5]]
+		let patches = [Patch (Colour 120 30 2 0.3) 3 (Coord x y) | x <- [-5..5], y <- [-1..5]]
 		
 		putStrLn $ "Is second of test couple visibile to first?"
 		putStrLn $ show $ isVisible (fst testCouple) (snd testCouple)
@@ -145,11 +158,9 @@ where
 		putStrLn $ show $ length $ neighbours (fst testCouple) patches
 
 		putStrLn $ show $ dealDamage (fst testCouple) (snd testCouple)
-	
-
-		
-		putStrLn $ show $ patches !! 2
 
 		putStrLn $ show $ [(x, y) | x <- [1..3] , y <- [2..4] ]
 		putStrLn $ show $ [(x, y) | (Patch _ _ (Coord x y)) <- patches] 
 		putStrLn $ show $ [(x, y) | (Coord x y) <- possibleMoves (snd testCouple) patches]
+
+		putStrLn $ show $ nearestFreeCoord (snd testCouple) patches 
