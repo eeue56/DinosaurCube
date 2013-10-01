@@ -16,6 +16,10 @@ where
 		_coord :: Coordinate
 	} deriving (Show, Eq, Ord)
 
+	data Move = StayStill | MakeAMate Patch 
+				| Attack Patch | Move Coordinate
+				deriving (Show, Eq, Ord)
+
 	mkLabels[''Patch]
 	range = 25
 	viewingDistance = 4
@@ -105,19 +109,38 @@ where
 			isIn i j (Patch _ _ (Coord x y)) = x == i && y == j
 			n = neighbours p xs
 
-
 	nearestFreeCoord :: Patch -> [Patch] -> Coordinate
-	nearestFreeCoord p xs = head possibleList
+	nearestFreeCoord p xs = head $ concat $ map (\x -> possibleMoves x xs) $ byDistance p xs
+
+	nextMove :: Patch -> [Patch] -> Move
+	nextMove p xs = threatend threats
 		where
-			distance = byDistance p xs
-			possibleList = concat $ map (\x -> possibleMoves x xs) distance
+			moves = possibleMoves p xs
+			n = neighbours p xs
+			nextMates = filter (isMated p) n 
+			nextToAttack = filter (\x -> isThreat x p) n
+			threats = filter (isThreat p) n
+
+
+			threatend [] = mating nextMates 
+			threatend xs = escape moves
+
+			escape [] = threatend []
+			escape xs = Move $ head moves
+
+			mating [] = attack nextToAttack
+			mating xs = MakeAMate $ head nextMates
+
+			attack [] = StayStill
+			attack xs = Attack $ head nextToAttack
+
 
 
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
 			(Patch (Colour 120 38 160 0.2) 2 (Coord 2 3) )) 
 
-		let patches = [Patch (Colour 120 30 2 0.3) 3 (Coord x y) | x <- [-5..5], y <- [-1..5]]
+		let patches = [Patch (Colour 75 67 2 0.3) 5 (Coord x y) | x <- [1,3..5], y <- [-1..5]]
 		
 		putStrLn $ "Is second of test couple visibile to first?"
 		putStrLn $ show $ isVisible (fst testCouple) (snd testCouple)
@@ -147,10 +170,7 @@ where
 
 		putStrLn $ show $ threatRate (fst testCouple) (snd testCouple)
 
-		putStrLn "Len patches"
-		putStrLn $ show $ length patches
 		putStrLn $ show $ matePatches (fst testCouple) (snd testCouple) patches
-		putStrLn $ show $ length patches
 
 		putStrLn $ show $ isNextTo (fst testCouple) (snd testCouple)
 		putStrLn $ show $ length $ neighbours (fst testCouple) patches
@@ -162,3 +182,6 @@ where
 		putStrLn $ show $ [(x, y) | (Coord x y) <- possibleMoves (snd testCouple) patches]
 
 		putStrLn $ show $ nearestFreeCoord (snd testCouple) patches 
+
+
+		putStrLn $ show $ nextMove (fst testCouple) patches
