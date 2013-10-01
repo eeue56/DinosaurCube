@@ -71,8 +71,8 @@ where
 	matingPatches :: Patch -> [Patch] -> [Patch]
 	matingPatches p xs = filter (isMated p) $ visiblePatches p xs
 
-	matePatches :: Patch -> Patch -> Patch
-	matePatches (Patch c1 s1 l1) (Patch c2 s2 l2) = Patch (Colour r g b a) s l1 
+	matePatches :: Patch -> Patch -> [Patch] -> Patch
+	matePatches p@(Patch c1 s1 l1) (Patch c2 s2 l2) xs = Patch (Colour r g b a) s (nearestFreeCoord p xs)
 		where
 			s = newSize s1 s2
 			r = newRed c1 c2
@@ -105,17 +105,12 @@ where
 			isIn i j (Patch _ _ (Coord x y)) = x == i && y == j
 			n = neighbours p xs
 
-	nearestFreeCoord :: Patch -> [Patch] -> Coordinate
-	nearestFreeCoord p xs = 
-		if moves /= [] then
-			head moves
-		else
-			head $ head [x | x <- myMoves , x /= []]
-		where 
-			moves = possibleMoves p xs
-			myNeighbours = neighbours p xs
-			myMoves = head [ys | x <- neighbours p xs, let ys = [possibleMoves i xs | i <- neighbours x xs], ys /= []]
 
+	nearestFreeCoord :: Patch -> [Patch] -> Coordinate
+	nearestFreeCoord p xs = head possibleList
+		where
+			distance = byDistance p xs
+			possibleList = concat $ map (\x -> possibleMoves x xs) distance
 
 
 	main = do
@@ -152,7 +147,10 @@ where
 
 		putStrLn $ show $ threatRate (fst testCouple) (snd testCouple)
 
-		putStrLn $ show $ matePatches (fst testCouple) (snd testCouple)
+		putStrLn "Len patches"
+		putStrLn $ show $ length patches
+		putStrLn $ show $ matePatches (fst testCouple) (snd testCouple) patches
+		putStrLn $ show $ length patches
 
 		putStrLn $ show $ isNextTo (fst testCouple) (snd testCouple)
 		putStrLn $ show $ length $ neighbours (fst testCouple) patches
