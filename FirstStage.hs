@@ -121,7 +121,6 @@ where
 			nextToAttack = filter (\x -> isThreat x p) n
 			threats = filter (isThreat p) n
 
-
 			threatend [] = mating nextMates 
 			threatend xs = escape moves
 
@@ -134,6 +133,8 @@ where
 			attack [] = StayStill
 			attack xs = Attack $ head nextToAttack
 
+	moveQueue :: [Patch] -> [(Patch, Move)]
+	moveQueue xs = [(x, nextMove x xs) | x <- xs]
 
 
 	main = do
@@ -185,3 +186,5 @@ where
 
 
 		putStrLn $ show $ nextMove (fst testCouple) patches
+
+		putStrLn $ show $  moveQueue patches
