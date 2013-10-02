@@ -10,6 +10,8 @@ where
 	import Data.Label
 	import Prelude hiding ((.), id)
 
+	import System.Random
+
 	data Patch = Patch {
 		_colour :: Colour,
 		_size :: Double, 
@@ -137,12 +139,62 @@ where
 	moveQueue xs = [(x, nextMove x xs) | x <- xs]
 
 
+	-- I saw your face
+	--- In a crowded place
+	---- And I don't know what to do
+	----- Because sometimes I mod you
+	------ And then as a result
+	------- You get added the list twice
+	-------- I feel as though maybe I should be monading somehow
+	--------- Ugh
+	-------- I think I should probably generate
+	------- Seperate control lists for moves 
+	------ That require modding of patches
+	----- So that duplicates don't occur
+	---- Though I'm not quite sure
+	--- I can think of other ways 
+	-- But it won't be pretty
+	doMoves :: [Patch] -> [Patch]
+	doMoves xs = concat [helper x y | (x, y) <- queue] 
+		where
+			helper x y = case y of
+				StayStill -> if attacked x then [] else [x]
+				Move l -> if attacked x then [] else [set coord l x]
+				Attack other -> [x, other]
+				MakeAMate other -> if attacked x then 
+										[matePatches x other xs]
+									else
+										[x, matePatches x other xs]
+
+			isAttacked :: (Patch, Move) -> Patch -> Bool
+			isAttacked (_, y) t = case y of
+				Attack other -> other == t
+				_ -> False
+
+			attacked y = not $ any (\x -> isAttacked x y) queue 
+			queue = moveQueue xs
+
+
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
 			(Patch (Colour 120 38 160 0.2) 2 (Coord 2 3) )) 
 
-		let patches = [Patch (Colour 75 67 2 0.3) 5 (Coord x y) | x <- [1,3..5], y <- [-1..5]]
-		
+
+
+		let patches = [Patch 
+				(Colour 
+					(if odd x then 45 else 185) 
+					(if odd x then 23 else 200) 
+					(if odd x then 2 else 140) 
+					(if odd y then 0.3 else 0.7)
+				) 
+				5
+				(Coord x y) 
+				| x <- [0,2..6], 
+				y <- [-1, 1..5]]
+
+
+	
 		putStrLn $ "Is second of test couple visibile to first?"
 		putStrLn $ show $ isVisible (fst testCouple) (snd testCouple)
 
@@ -187,4 +239,5 @@ where
 
 		putStrLn $ show $ nextMove (fst testCouple) patches
 
-		putStrLn $ show $  moveQueue patches
+		putStrLn $ show $ length $ patches
+		putStrLn $ show $ length $ doMoves patches
