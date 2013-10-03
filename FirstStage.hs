@@ -138,6 +138,12 @@ where
 	moveQueue :: [Patch] -> [(Patch, Move)]
 	moveQueue xs = [(x, nextMove x xs) | x <- xs]
 
+	unionPatchChanges :: Patch -> [(Patch, Move)] -> Patch
+	unionPatchChanges p [] = p
+	unionPatchChanges p ((other, move):xs) = case move of 
+			Attack _ -> unionPatchChanges (dealDamage p other) xs
+			Move l -> unionPatchChanges (set coord l p) xs
+			_ -> unionPatchChanges p xs
 
 	-- I saw your face
 	--- In a crowded place
@@ -159,7 +165,7 @@ where
 		where
 			helper x y = case y of
 				StayStill -> if attacked x then [] else [x]
-				Move l -> if attacked x then [] else [set coord l x]
+				Move l -> if attacked x then [set coord l x] else [set coord l x]
 				Attack other -> [x, other]
 				MakeAMate other -> if attacked x then 
 										[matePatches x other xs]
@@ -181,19 +187,18 @@ where
 
 
 
-		let patches = [Patch 
-				(Colour 
-					(if odd x then 45 else 185) 
-					(if odd x then 23 else 200) 
-					(if odd x then 2 else 140) 
-					(if odd y then 0.3 else 0.7)
-				) 
-				5
-				(Coord x y) 
-				| x <- [0,2..6], 
-				y <- [-1, 1..5]]
-
-
+		let patches = [Patch (Colour 215 159 198 0.5) 8 (Coord 3 1),
+						 Patch (Colour 121 45 85 0.5) 10 (Coord 2 1),
+						 Patch (Colour 71 193 67 0.5) 2 (Coord 8 1),
+						 Patch (Colour 178 210 182 0.5) 8 (Coord 8 1),
+						 Patch (Colour 105 82 219 0.5) 3 (Coord 7 1),
+						 Patch (Colour 52 60 208 0.5) 3 (Coord 0 1),
+						 Patch (Colour 215 175 102 0.5) 6 (Coord 4 1),
+						 Patch (Colour 36 48 4 0.5) 2 (Coord 5 1),
+						 Patch (Colour 27 24 156 0.5) 9 (Coord 7 1),
+						 Patch (Colour 132 173 237 0.5) 7 (Coord 9 1),
+						 Patch (Colour 161 64 19 0.5) 3 (Coord 8 1), 
+						 Patch (Colour 60 125 51 0.5) 2 (Coord 8 0)]
 	
 		putStrLn $ "Is second of test couple visibile to first?"
 		putStrLn $ show $ isVisible (fst testCouple) (snd testCouple)
@@ -240,4 +245,4 @@ where
 		putStrLn $ show $ nextMove (fst testCouple) patches
 
 		putStrLn $ show $ length $ patches
-		putStrLn $ show $ length $ doMoves patches
+		putStrLn $ show $ doMoves patches
