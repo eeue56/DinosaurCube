@@ -1,4 +1,4 @@
-{-# LANGUAGE ParallelListComp, TemplateHaskell, TypeOperators #-}
+{-# LANGUAGE ParallelListComp, TemplateHaskell, TypeOperators, BangPatterns #-}
 
 module FirstStage
 where
@@ -139,11 +139,20 @@ where
 	moveQueue xs = [(x, nextMove x xs) | x <- xs]
 
 	unionPatchChanges :: Patch -> [(Patch, Move)] -> Patch
-	unionPatchChanges p [] = p
-	unionPatchChanges p ((other, move):xs) = case move of 
+	unionPatchChanges !p ![] = p
+	unionPatchChanges !p !((other, move):xs) = case move of 
 			Attack _ -> unionPatchChanges (dealDamage p other) xs
 			Move l -> unionPatchChanges (set coord l p) xs
 			_ -> unionPatchChanges p xs
+
+	isMe :: (Patch, Move) -> Patch -> Bool
+	isMe (x, y) t = case y of
+		Attack other -> other == t 
+		Move _ -> x == t
+		_ -> False
+
+	relatedMoves :: Patch -> [(Patch, Move)] -> [(Patch, Move)]
+	relatedMoves p !xs = filter (\x -> isMe x p) xs
 
 	-- I saw your face
 	--- In a crowded place
@@ -165,19 +174,22 @@ where
 		where
 			helper x y = case y of
 				StayStill -> if attacked x then [] else [x]
-				Move l -> if attacked x then [set coord l x] else [set coord l x]
-				Attack other -> [x, other]
+				Move l -> if attacked x then [] else [set coord l x]
+				Attack other -> [x, (unionPatchChanges other $ myMoves other)]
 				MakeAMate other -> if attacked x then 
 										[matePatches x other xs]
 									else
 										[x, matePatches x other xs]
+
 
 			isAttacked :: (Patch, Move) -> Patch -> Bool
 			isAttacked (_, y) t = case y of
 				Attack other -> other == t
 				_ -> False
 
-			attacked y = not $ any (\x -> isAttacked x y) queue 
+			myMoves x = relatedMoves x queue
+
+			attacked y = 1 < (length $ myMoves y)  
 			queue = moveQueue xs
 
 
@@ -187,7 +199,7 @@ where
 
 
 
-		let patches = [Patch (Colour 215 159 198 0.5) 8 (Coord 3 1),
+		let patches = doMoves $ [Patch (Colour 215 159 198 0.5) 8 (Coord 3 1),
 						 Patch (Colour 121 45 85 0.5) 10 (Coord 2 1),
 						 Patch (Colour 71 193 67 0.5) 2 (Coord 8 1),
 						 Patch (Colour 178 210 182 0.5) 8 (Coord 8 1),
@@ -245,4 +257,8 @@ where
 		putStrLn $ show $ nextMove (fst testCouple) patches
 
 		putStrLn $ show $ length $ patches
-		putStrLn $ show $ doMoves patches
+
+
+		putStrLn $ show $ relatedMoves (head patches) $ moveQueue patches
+
+		putStrLn $ show $ isMe (fst testCouple, Attack $ snd testCouple) $ snd testCouple 
