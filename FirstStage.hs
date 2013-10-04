@@ -10,7 +10,7 @@ where
 	import Data.Label
 	import Prelude hiding ((.), id)
 
-	import System.Random
+	import Data.Maybe
 
 	data Patch = Patch {
 		_colour :: Colour,
@@ -170,7 +170,7 @@ where
 	--- I can think of other ways 
 	-- But it won't be pretty
 	doMoves :: [Patch] -> [Patch]
-	doMoves xs = concat [helper x y | (x, y) <- queue] 
+	doMoves xs = filter (\x -> (get size x) > 0) $ concat [helper x y | (x, y) <- queue] 
 		where
 			helper x y = case y of
 				StayStill -> if attacked x then [] else [x]
@@ -257,8 +257,7 @@ where
 		putStrLn $ show $ nextMove (fst testCouple) patches
 
 		putStrLn $ show $ length $ patches
-
-
-		putStrLn $ show $ relatedMoves (head patches) $ moveQueue patches
+		putStrLn $ show $ length $ doMoves patches
+		putStrLn $ show $ length $ patches
 
 		putStrLn $ show $ isMe (fst testCouple, Attack $ snd testCouple) $ snd testCouple 
