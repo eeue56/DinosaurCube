@@ -192,6 +192,10 @@ where
 			attacked y = 1 < (length $ myMoves y)  
 			queue = moveQueue xs
 
+	doXGenerations :: Int -> [Patch] -> [Patch]
+	doXGenerations 0 xs = xs
+	doXGenerations n xs = doXGenerations (n - 1) $ doMoves xs
+
 
 	main = do
 		let testCouple = ((Patch (Colour 125 34 78 0.5) 1 (Coord 3 2)), 
@@ -257,7 +261,8 @@ where
 		putStrLn $ show $ nextMove (fst testCouple) patches
 
 		putStrLn $ show $ length $ patches
-		putStrLn $ show $ length $ doMoves patches
+		putStrLn $ show $ length $ doXGenerations 5 patches
+		putStrLn $ show $ length $ doMoves $ doMoves $ doMoves $ doMoves $ doMoves $ patches
 		putStrLn $ show $ length $ patches
 
 		putStrLn $ show $ isMe (fst testCouple, Attack $ snd testCouple) $ snd testCouple 
