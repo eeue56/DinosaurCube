@@ -26,23 +26,28 @@ where
 	range = 25
 	viewingDistance = 4
 	
+	-- Get the new size from two previous sizes
 	newSize :: Double -> Double -> Double 
 	newSize s1 s2 
 		| s1 < s2 = s1 + (s2 / 5)
 		| s1 > s2 = s2 - (s1 / 5)
 		| otherwise = s1
 
+	-- Returns true if patches are similiar enough to reproduce
 	isMated :: Patch -> Patch -> Bool
 	isMated (Patch x _ _) (Patch y _ _) = 2 <= matesRates x y
 
+	-- Returns the threat rate from the second argument to the first argument
 	threatRate :: Patch -> Patch -> Double
 	threatRate hunted@(Patch x y _) hunter@(Patch i j _) = j - (y + simRate) 
 		where 
 			simRate = fromIntegral $ matesRates x i
 
+	-- Returns true if there is a positive thread from h2 to h1
 	isThreat :: Patch -> Patch -> Bool
 	isThreat h1 h2 = threatRate h1 h2 > 0.0
 
+	-- Returns if the second patch is visible to the first patch
 	isVisible :: Patch -> Patch -> Bool
 	isVisible spotter@(Patch x y z) spottee@(Patch i j k) = finalDistance >= distance
 		where
@@ -54,6 +59,7 @@ where
 				else
 					spotterViewDistance
 
+	-- Returns the ordering of two patches
 	sortPatchesByDistance :: Patch -> Patch -> Patch -> Ordering
 	sortPatchesByDistance (Patch _ _ c) y z
 		| cToY > cToZ = GT
@@ -63,20 +69,27 @@ where
 			cToY = distanceBetween c (get coord y)
 			cToZ = distanceBetween c (get coord z)
 
+	-- Returns the patch list sorted by distance, nearest first
 	byDistance :: Patch -> [Patch] -> [Patch]
 	byDistance p xs = sortBy sorter xs
 		where
 			sorter = sortPatchesByDistance p
 
+	-- Returns a list of patches visible to the patch
 	visiblePatches :: Patch -> [Patch] -> [Patch]
 	visiblePatches p xs = filter (isVisible p) $ byDistance p xs
 
+	-- Returns a list of patches which are a threat to the patch
+	-- filters on visible patches
 	threateningPatches :: Patch -> [Patch] -> [Patch]
 	threateningPatches p xs = filter (isThreat p) $ visiblePatches p xs
 
+	-- Returns a list of patches suitable for mating
+	-- filters on visible
 	matingPatches :: Patch -> [Patch] -> [Patch]
 	matingPatches p xs = filter (isMated p) $ visiblePatches p xs
 
+	-- Take two patches, mate them, put it on the nearest free coord and return
 	matePatches :: Patch -> Patch -> [Patch] -> Patch
 	matePatches p@(Patch c1 s1 l1) (Patch c2 s2 l2) xs = Patch (Colour r g b a) s (nearestFreeCoord p xs)
 		where
@@ -86,12 +99,15 @@ where
 			b = newBlue c1 c2
 			a = newAlpha c1 c2
 
+	-- Returns true if the patches are next to each other
 	isNextTo :: Patch -> Patch -> Bool
 	isNextTo (Patch _ _ c1) (Patch _ _ c2) = distanceBetween c1 c2 <= 2.0
 
+	-- Returns the neighbours of the patch
 	neighbours :: Patch -> [Patch] -> [Patch]
 	neighbours p xs = filter (isNextTo p) xs
 
+	-- Deal damage to p1 from p2
 	dealDamage :: Patch -> Patch -> Patch
 	dealDamage p1 p2 = set size (s2 - (s1 * a1)) p1
 		where
@@ -99,6 +115,7 @@ where
 			s1 = get size p1
 			a1 = get alpha $ get colour p1
 
+	-- List the possible moves as a list of coordinates
 	possibleMoves :: Patch -> [Patch] -> [Coordinate]
 	possibleMoves p@(Patch _ _ (Coord i j)) xs = 
 		[Coord x y | 
@@ -111,9 +128,11 @@ where
 			isIn i j (Patch _ _ (Coord x y)) = x == i && y == j
 			n = neighbours p xs
 
+	-- Returns the nearest free coord
 	nearestFreeCoord :: Patch -> [Patch] -> Coordinate
 	nearestFreeCoord p xs = head $ concat $ map (\x -> possibleMoves x xs) $ byDistance p xs
 
+	-- Returns the next move made by the patch
 	nextMove :: Patch -> [Patch] -> Move
 	nextMove p xs = threatend threats
 		where
@@ -135,9 +154,12 @@ where
 			attack [] = StayStill
 			attack xs = Attack $ head nextToAttack
 
+	-- Generate the move queue for all patches in patch list
 	moveQueue :: [Patch] -> [(Patch, Move)]
 	moveQueue xs = [(x, nextMove x xs) | x <- xs]
 
+	-- Apply all queued changes to a singular patch
+	-- Applied in the order of the list
 	unionPatchChanges :: Patch -> [(Patch, Move)] -> Patch
 	unionPatchChanges !p ![] = p
 	unionPatchChanges !p !((other, move):xs) = case move of 
@@ -145,15 +167,18 @@ where
 			Move l -> unionPatchChanges (set coord l p) xs
 			_ -> unionPatchChanges p xs
 
+	-- Returns true if the patch passed in is the one as part of the move
 	isMe :: (Patch, Move) -> Patch -> Bool
 	isMe (x, y) t = case y of
 		Attack other -> other == t 
 		Move _ -> x == t
 		_ -> False
 
+	-- returns all moves that involve patch
 	relatedMoves :: Patch -> [(Patch, Move)] -> [(Patch, Move)]
 	relatedMoves p !xs = filter (\x -> isMe x p) xs
 
+	-- apply all the moves and return the new patch list
 	doMoves :: [Patch] -> [Patch]
 	doMoves xs = filter (\x -> (get size x) > 0) $ concat [helper x y | (x, y) <- queue] 
 		where
@@ -177,6 +202,7 @@ where
 			attacked y = 1 < (length $ myMoves y)  
 			queue = moveQueue xs
 
+	-- Do a number of moves at once
 	doXGenerations :: Int -> [Patch] -> [Patch]
 	doXGenerations 0 xs = xs
 	doXGenerations n xs = doXGenerations (n - 1) $ doMoves xs
