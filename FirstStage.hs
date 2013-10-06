@@ -154,21 +154,6 @@ where
 	relatedMoves :: Patch -> [(Patch, Move)] -> [(Patch, Move)]
 	relatedMoves p !xs = filter (\x -> isMe x p) xs
 
-	-- I saw your face
-	--- In a crowded place
-	---- And I don't know what to do
-	----- Because sometimes I mod you
-	------ And then as a result
-	------- You get added the list twice
-	-------- I feel as though maybe I should be monading somehow
-	--------- Ugh
-	-------- I think I should probably generate
-	------- Seperate control lists for moves 
-	------ That require modding of patches
-	----- So that duplicates don't occur
-	---- Though I'm not quite sure
-	--- I can think of other ways 
-	-- But it won't be pretty
 	doMoves :: [Patch] -> [Patch]
 	doMoves xs = filter (\x -> (get size x) > 0) $ concat [helper x y | (x, y) <- queue] 
 		where
