@@ -190,15 +190,7 @@ where
 										[matePatches x other xs]
 									else
 										[x, matePatches x other xs]
-
-
-			isAttacked :: (Patch, Move) -> Patch -> Bool
-			isAttacked (_, y) t = case y of
-				Attack other -> other == t
-				_ -> False
-
 			myMoves x = relatedMoves x queue
-
 			attacked y = 1 < (length $ myMoves y)  
 			queue = moveQueue xs
 
@@ -272,7 +264,7 @@ where
 		putStrLn $ show $ nextMove (fst testCouple) patches
 
 		putStrLn $ show $ length $ patches
-		putStrLn $ show $ length $ doXGenerations 5 patches
+		putStrLn $ show $ length $ doXGenerations 8 patches
 		putStrLn $ show $ length $ doMoves $ doMoves $ doMoves $ doMoves $ doMoves $ patches
 		putStrLn $ show $ length $ patches
 
