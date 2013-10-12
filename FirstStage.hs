@@ -1,4 +1,4 @@
-{-# LANGUAGE ParallelListComp, TemplateHaskell, TypeOperators, BangPatterns #-}
+{-# LANGUAGE ParallelListComp, TemplateHaskell, TypeOperators, BangPatterns, DataKinds #-}
 
 module FirstStage
 where
@@ -198,6 +198,14 @@ where
 	doXGenerations :: Int -> [Patch] -> [Patch]
 	doXGenerations 0 xs = xs
 	doXGenerations n xs = doXGenerations (n - 1) $ doMoves xs
+
+	isInRange :: Coordinate -> Coordinate -> Patch -> Bool
+	isInRange (Coord x y) (Coord a b) (Patch _ _ (Coord i j)) = (x <= i && i <= a) && (y <= j && j <= b)
+
+	doRestrictedXGenerations :: Int -> Coordinate -> Coordinate -> [Patch] -> [Patch]
+	doRestrictedXGenerations 0 c1 c2 xs = filter (isInRange c1 c2) xs
+	doRestrictedXGenerations n c1 c2 xs = doRestrictedXGenerations n c1 c2 $ filter (isInRange c1 c2) xs
+	
 
 
 	main = do
