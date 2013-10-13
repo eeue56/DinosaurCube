@@ -205,17 +205,39 @@ where
 	doXGenerations 0 xs = xs
 	doXGenerations n xs = doXGenerations (n - 1) $ doMoves xs
 
+	-- Return true if the patch is between the two coordinates
 	isInRange :: Coordinate -> Coordinate -> Patch -> Bool
 	isInRange (Coord x y) (Coord a b) (Patch _ _ (Coord i j)) = (x <= i && i <= a) && (y <= j && j <= b)
 
+	-- Do moves for x generations, keeping the living patches inside the two coords
+	-- That way compution takes less time and it can be sure to finish in a reasonable 
+	-- Time and view. Might be worth expanding this in terms of a viewport
+	-- Be able to generate those outside the viewport on demand based on the history
+	-- of moves taken is really handy. Imagine if the player wants to expand
+	-- the viewed world beyond the typical reaches of their normal view
+	-- In order for this to work and seem realistic, all those inside the new
+	-- viewport will need to be generated. I guess th e easiest way of doing this is to
+	-- get the the initial patches, get the number of moves taken and then run this with
+	-- the new bounds. Might be a bit slow and not ideal - especially if at some point
+	-- randomness is introduced, but that's why I've not included random numbers
+	-- The reason why game of life is so powerful is because they are always the same
+	-- results given an initial board layout. Using this means that the algorithm
+	-- itself is really easy to program and then test for correctness
+	-- Should I want to port this code over to some other language or platform
+	-- for example, web based HTML/Js, then I can write a whole bunch of test methods
+	-- and verify the output
 	doRestrictedXGenerations :: Int -> Coordinate -> Coordinate -> [Patch] -> [Patch]
 	doRestrictedXGenerations 0 c1 c2 xs = filter (isInRange c1 c2) xs
 	doRestrictedXGenerations n c1 c2 xs = doRestrictedXGenerations (n - 1) c1 c2 $ filter (isInRange c1 c2) xs
 	
+	-- Perform moves until all patches are dead, 
+	-- then return the amount of moves it took
 	generateTilDeath :: [Patch] -> Int
 	generateTilDeath [] = 0
 	generateTilDeath xs = 1 + (generateTilDeath $ doRestrictedXGenerations 1 (Coord 0 0) (Coord 10 10) xs) 
 
+	-- Gets the patch on the coorindate passed in
+	-- If there is no patch, return Nothing
 	patchOn :: Coordinate -> [Patch] -> Maybe Patch
 	patchOn _ [] = Nothing
 	patchOn c@(Coord x y) (p@(Patch _ _ (Coord x1 y1)):xs) = if x1 == x && y == y1
