@@ -204,7 +204,7 @@ where
 
 	doRestrictedXGenerations :: Int -> Coordinate -> Coordinate -> [Patch] -> [Patch]
 	doRestrictedXGenerations 0 c1 c2 xs = filter (isInRange c1 c2) xs
-	doRestrictedXGenerations n c1 c2 xs = doRestrictedXGenerations n c1 c2 $ filter (isInRange c1 c2) xs
+	doRestrictedXGenerations n c1 c2 xs = doRestrictedXGenerations (n - 1) c1 c2 $ filter (isInRange c1 c2) xs
 	
 
 
@@ -272,7 +272,7 @@ where
 		putStrLn $ show $ nextMove (fst testCouple) patches
 
 		putStrLn $ show $ length $ patches
-		putStrLn $ show $ length $ doXGenerations 8 patches
+		putStrLn $ show $ length $ doRestrictedXGenerations 100 (Coord 0 0) (Coord 10 10) patches
 		putStrLn $ show $ length $ doMoves $ doMoves $ doMoves $ doMoves $ doMoves $ patches
 		putStrLn $ show $ length $ patches
 
