@@ -34,16 +34,19 @@ where
 		| otherwise = s1
 
 	-- Returns true if patches are similiar enough to reproduce
+	-- TODO: Look into cleverer way of detecting if patches should mate or not
 	isMated :: Patch -> Patch -> Bool
 	isMated (Patch x _ _) (Patch y _ _) = 2 <= matesRates x y
 
 	-- Returns the threat rate from the second argument to the first argument
+	-- TODO: Look into cleverer ways of detecting the threat rate
 	threatRate :: Patch -> Patch -> Double
 	threatRate hunted@(Patch x y _) hunter@(Patch i j _) = j - (y + simRate) 
 		where 
 			simRate = fromIntegral $ matesRates x i
 
 	-- Returns true if there is a positive thread from h2 to h1
+	-- TODO: Look into cleverer ways of detecting if threat or not
 	isThreat :: Patch -> Patch -> Bool
 	isThreat h1 h2 = threatRate h1 h2 > 0.0
 
@@ -59,7 +62,9 @@ where
 				else
 					spotterViewDistance
 
-	-- Returns the ordering of two patches
+	-- Returns the ordering of two patches, based on some initial patch
+	-- Basically, it figures out whether the second patch is closer to the
+	-- first patch than the third patch
 	sortPatchesByDistance :: Patch -> Patch -> Patch -> Ordering
 	sortPatchesByDistance (Patch _ _ c) y z
 		| cToY > cToZ = GT
@@ -108,8 +113,9 @@ where
 	neighbours p xs = filter (isNextTo p) xs
 
 	-- Deal damage to p1 from p2
+	-- TODO: Check that this actually works.
 	dealDamage :: Patch -> Patch -> Patch
-	dealDamage p1 p2 = set size (s2 - (s1 * a1)) p1
+	dealDamage p1 p2 = set size (s1 - (s2 * a1)) p1
 		where
 			s2 = get size p2
 			s1 = get size p1
@@ -206,6 +212,17 @@ where
 	doRestrictedXGenerations 0 c1 c2 xs = filter (isInRange c1 c2) xs
 	doRestrictedXGenerations n c1 c2 xs = doRestrictedXGenerations (n - 1) c1 c2 $ filter (isInRange c1 c2) xs
 	
+	generateTilDeath :: [Patch] -> Int
+	generateTilDeath [] = 0
+	generateTilDeath xs = 1 + (generateTilDeath $ doRestrictedXGenerations 1 (Coord 0 0) (Coord 10 10) xs) 
+
+	patchOn :: Coordinate -> [Patch] -> Maybe Patch
+	patchOn _ [] = Nothing
+	patchOn c@(Coord x y) (p@(Patch _ _ (Coord x1 y1)):xs) = if x1 == x && y == y1
+		then
+			Just p 
+		else
+			patchOn c xs
 
 
 	main = do
@@ -221,6 +238,7 @@ where
 						 Patch (Colour 105 82 219 0.5) 3 (Coord 7 1),
 						 Patch (Colour 52 60 208 0.5) 3 (Coord 0 1),
 						 Patch (Colour 215 175 102 0.5) 6 (Coord 4 1),
+						 Patch (Colour 10 25 20 0.5) 16 (Coord 4 2),
 						 Patch (Colour 36 48 4 0.5) 2 (Coord 5 1),
 						 Patch (Colour 27 24 156 0.5) 9 (Coord 7 1),
 						 Patch (Colour 132 173 237 0.5) 7 (Coord 9 1),
@@ -272,8 +290,14 @@ where
 		putStrLn $ show $ nextMove (fst testCouple) patches
 
 		putStrLn $ show $ length $ patches
-		putStrLn $ show $ length $ doRestrictedXGenerations 100 (Coord 0 0) (Coord 10 10) patches
+		putStrLn $ show $ patchOn (Coord 2 0) [Patch (Colour 1 1 1 0.5) 5 (Coord 2 0)]
+		putStrLn $ show $ "After:"
+		putStrLn $ show $ patchOn (Coord 2 0) $ doRestrictedXGenerations 1 (Coord 0 0) (Coord 10 10) patches
+		putStrLn $ show $  doRestrictedXGenerations 1 (Coord 0 0) (Coord 10 10) patches
 		putStrLn $ show $ length $ doMoves $ doMoves $ doMoves $ doMoves $ doMoves $ patches
 		putStrLn $ show $ length $ patches
+
+
+		--putStrLn $ show $ generateTilDeath patches
 
 		putStrLn $ show $ isMe (fst testCouple, Attack $ snd testCouple) $ snd testCouple 
