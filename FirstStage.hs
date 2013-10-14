@@ -35,6 +35,12 @@ where
 
 	-- Returns true if patches are similiar enough to reproduce
 	-- TODO: Look into cleverer way of detecting if patches should mate or not
+	-- Ideally, I should have some kind of logical reason as to why I generate
+	-- the rate. At the moment, I am just working out how similar they are in terms
+	-- of colour, under the premise that animals with similar colours are genetically 
+	-- similar enough in order to reproduce. I think I should also work all the properties of patches
+	-- into this. For example, should large patches mate with those which are much smaller?
+	-- I'd like to base it on research rather than just what I believe will work.
 	isMated :: Patch -> Patch -> Bool
 	isMated (Patch x _ _) (Patch y _ _) = 2 <= matesRates x y
 
@@ -121,7 +127,7 @@ where
 			s1 = get size p1
 			a1 = get alpha $ get colour p1
 
-	-- List the possible moves as a list of coordinates
+	-- List the possible moves as a list of coordinates1
 	possibleMoves :: Patch -> [Patch] -> [Coordinate]
 	possibleMoves p@(Patch _ _ (Coord i j)) xs = 
 		[Coord x y | 
